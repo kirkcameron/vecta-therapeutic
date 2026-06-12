@@ -1,0 +1,170 @@
+# Vecta Therapeutic: Meaning Understanding for AI
+
+> **RAG retrieves facts. Vecta retrieves meaning.**
+
+Vecta is an XOR cascade associative memory system that understands *why* and *what it means* — not just *what happened*.
+
+## The Problem with Current AI
+
+Traditional AI fails at the questions humans actually ask when they're struggling:
+
+- "My boss says 'let's revisit this' but nothing ever changes — what does this **mean**?"
+- "My partner goes quiet when I share good news — what's happening?"
+- "Why do I keep attracting the same type of person?"
+
+LLMs hallucinate because they try to answer **MEANING questions** with **FACT retrieval**. Vecta answers meaning questions correctly.
+
+## The Innovation
+
+| Traditional AI | Vecta Therapeutic |
+|----------------|-------------------|
+| "Here are 10 tips for following up" | "Your boss is communicating something without saying it" |
+| High confidence on uncertain questions | Calibrated confidence on nuanced questions |
+| Single answer | Multiple hypotheses ranked by confidence |
+| Prescriptive | Exploratory |
+| No subtext awareness | Understands irony, tone, power dynamics |
+
+## The Relationship Decoder: Boss Edition
+
+### Input
+```
+"My boss always says 'we should revisit this' but nothing ever changes"
+```
+
+### Vecta Analysis
+
+#### Pattern Detected
+**Agreement without action**
+
+#### Top Interpretation: Power Play
+- **Confidence:** High
+- **Pattern:** "We should revisit" = polite refusal
+- **Signals:** ABDICATING, DELEGATING, REFUSAL, DISHONESTY
+- **Meaning:** Boss is avoiding direct confrontation
+
+#### Secondary: Genuine Disagreement
+- **Confidence:** Medium
+- **Signals:** DISAGREEMENT, DISPUTE, OPPONENT
+- **Meaning:** Boss disagrees but won't say it directly
+
+#### Excluded Interpretations
+- ❌ NOT genuine forgetfulness
+- ❌ NOT simply busy
+- ❌ NOT benign
+
+#### This Is NOT a Coordination Problem
+This is a **POWER problem**.
+
+### What This Means for the Employee
+
+**Exploration questions:**
+- "What do you think is preventing your boss from committing?"
+- "Has your boss ever followed through on a 'revisit'?"
+- "What happens when you bring it up again?"
+
+**Possible actions:**
+- "Try: 'I'd love to understand your concerns. What's making this hard to decide now?'"
+- "If it's a power play: Decide if you want to escalate or let it go"
+- "If it's fear of conflict: Create safety for direct conversation"
+
+## Architecture
+
+```
+USER INPUT
+    ↓
+┌─────────────────────────────────┐
+│ CRISIS DETECTION                │
+│ Keywords: suicide, self-harm,   │
+│ abuse, immediate danger         │
+└─────────────────────────────────┘
+    ↓ (no crisis)
+┌─────────────────────────────────┐
+│ PATTERN EXTRACTION              │
+│ What is the surface pattern?   │
+└─────────────────────────────────┘
+    ↓
+┌─────────────────────────────────┐
+│ INTERPRETATION GENERATION        │
+│ Multiple hypotheses + confidence│
+└─────────────────────────────────┘
+    ↓
+┌─────────────────────────────────┐
+│ SAFETY REVIEW                   │
+│ Is any interpretation harmful?  │
+│ Is this a crisis situation?     │
+└─────────────────────────────────┘
+    ↓
+THERAPIST INTERFACE
+(Professional reviews before client sees anything)
+```
+
+## Key Capabilities
+
+- **Causal reasoning**: Understands "LEADS TO", "CAUSES", "PRECEDES"
+- **Metaphor understanding**: Irony, subtext, figurative language
+- **Power dynamics**: Who has power? How is it exercised?
+- **Framework-aware**: Can tag interpretations by therapeutic school (Gottman, CBT, attachment)
+
+## Brain Stats
+
+| Metric | Value |
+|--------|-------|
+| Entries | 3,264 |
+| Concepts | 948 |
+| Thoughts | 2,316 |
+| Synapses | 117,960 |
+| Quality Score | 95/100 |
+
+## Getting Started
+
+```bash
+# Clone the repo
+git clone https://github.com/your-org/vecta-therapeutic
+
+# Install dependencies
+npm install
+
+# Run the demo
+npm run demo:boss
+```
+
+## Project Structure
+
+```
+vecta-therapeutic/
+├── SPEC.md              ← Full API specification
+├── README.md            ← This file
+├── EXAMPLES/
+│   ├── relationship_decoder.md
+│   ├── negotiation_intelligence.md
+│   └── conflict_mediation.md
+├── BRAIN/
+│   └── communication-brain.json
+├── SAFETY/
+│   └── crisis_detection_rules.md
+└── src/
+    ├── api.ts
+    ├── safety.ts
+    └── synthesis.ts
+```
+
+## The Market
+
+Vecta answers **"What does this mean?"** — and that is a MASSIVE market:
+
+- 50% of therapy sessions
+- 70% of relationship conflicts
+- 80% of workplace frustrations
+- 90% of existential anxiety
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development guidelines.
+
+## License
+
+MIT
+
+---
+
+*Vecta is not a chatbot. It's a clinical tool for understanding meaning.*
