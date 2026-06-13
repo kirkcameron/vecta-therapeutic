@@ -195,6 +195,61 @@ def relationship_decoder(input_text: str) -> RelationshipAnalysis:
         ]
         excluded = ["NOT rejection", "NOT envy"]
         
+    elif "cancel" in lower or "repeats" in lower or "repeated" in lower:
+        # Cancellation/avoidance interpretation
+        avoidance_signals = [(w, s) for w, s in signals if any(x in w for x in ["AVOID", "DISINTEREST", "REPEATED", "WRONG"])]
+        confidence = 0.75 if len(avoidance_signals) > 2 else 0.5
+        
+        primary = Interpretation(
+            confidence=confidence,
+            pattern="avoidance_pattern",
+            meaning="Repeatedly canceling shows disinterest or avoidance. Something is wrong.",
+            framework="attachment",
+            signals=avoidance_signals[:5]
+        )
+        secondary = [
+            Interpretation(0.35, "schedule_conflict", "May have genuine scheduling issues.", "practical"),
+            Interpretation(0.30, "loss_of_interest", "May have lost interest in the relationship.", "attachment")
+        ]
+        excluded = ["NOT simply forgetful", "NOT random"]
+        
+    elif "sensitive" in lower or "overreact" in lower or "dramatic" in lower:
+        # Criticism/invalidation interpretation
+        criticism_signals = [(w, s) for w, s in signals if any(x in w for x in ["CRITICISM", "INVALIDATE", "DEHUMANIZE", "INSULT", "LECTURE"])]
+        confidence = 0.80 if len(criticism_signals) > 2 else 0.6
+        
+        primary = Interpretation(
+            confidence=confidence,
+            pattern="criticism_invalidation",
+            meaning="'You're too sensitive' is a form of criticism that invalidates feelings.",
+            framework="cbt",
+            signals=criticism_signals[:5]
+        )
+        secondary = [
+            Interpretation(0.40, "deflection", "Partner avoids taking responsibility.", "cbt"),
+            Interpretation(0.30, "communication_mismatch", "Different emotional expression norms.", "attachment")
+        ]
+        excluded = ["NOT helpful advice", "NOT constructive feedback"]
+        
+    elif "accept" in lower and ("immediately" in lower or "right away" in lower or "too quick" in lower):
+        # Quick acceptance interpretation
+        negotiation_signals = [(w, s) for w, s in signals if any(x in w for x in ["REGRET", "ENTHUSIASM", "FEAR", "DOUBT", "EASY"])]
+        confidence = 0.70 if len(negotiation_signals) > 2 else 0.5
+        
+        primary = Interpretation(
+            confidence=confidence,
+            pattern="quick_acceptance",
+            meaning="Quick acceptance may mean regret potential or genuine fit. Either way, probe deeper.",
+            framework="negotiation",
+            signals=negotiation_signals[:5]
+        )
+        secondary = [
+            Interpretation(0.40, "genuine_enthusiasm", "They genuinely want the deal.", "negotiation"),
+            Interpretation(0.35, "fear_of_losing", "They may regret later if they felt pressured.", "negotiation"),
+            Interpretation(0.25, "over_eager", "May indicate you left money on the table.", "negotiation")
+        ]
+        excluded = ["NOT a mistake", "NOT random"]
+        
     else:
         primary = Interpretation(0.5, "general", "Pattern detected. Explore further.", "general", signals[:3])
         secondary = []

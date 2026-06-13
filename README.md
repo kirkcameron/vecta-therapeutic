@@ -103,7 +103,9 @@ THERAPIST INTERFACE
 - **Causal reasoning**: Understands "LEADS TO", "CAUSES", "PRECEDES"
 - **Metaphor understanding**: Irony, subtext, figurative language
 - **Power dynamics**: Who has power? How is it exercised?
+- **Manipulation detection**: GASLIGHTING, DARVO, coercive control, silent treatment
 - **Framework-aware**: Can tag interpretations by therapeutic school (Gottman, CBT, attachment)
+- **Signal-driven architecture**: Pure Vecta signals drive interpretation — no keyword matching
 
 ## Brain Stats
 
@@ -128,12 +130,26 @@ npm install
 npm run demo:boss
 ```
 
+## Blog Series
+
+Learn the full story of Vecta Therapeutic:
+
+| Part | Title | Description |
+|------|-------|-------------|
+| [Part 1](../BLOG/part-01-what-is-vecta.md) | What is Vecta? | The origin story |
+| [Part 2](../BLOG/part-02-xor-cascades.md) | XOR Cascades | How associative memory works |
+| [Part 3](../BLOG/part-03-stress-testing.md) | Stress Testing | Finding Vecta's gaps |
+| [Part 4](../BLOG/part-04-api-design.md) | API Design | The therapeutic API |
+| [Part 5](../BLOG/part-05-future.md) | The Future | What's next |
+| **[Part 6](../BLOG/part-06-signal-driven-architecture.md)** | **Signal-Driven Architecture** | **How we built the meaning decoder** |
+
 ## Project Structure
 
 ```
 vecta-therapeutic/
 ├── SPEC.md              ← Full API specification
 ├── README.md            ← This file
+├── BLOG/                ← Blog series (6 parts)
 ├── EXAMPLES/
 │   ├── relationship_decoder.md
 │   ├── negotiation_intelligence.md
