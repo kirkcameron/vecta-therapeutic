@@ -193,12 +193,23 @@ def score_pattern(signals: list, absent: list, category: dict) -> PatternScore:
     # Bonus for exclusion signals being absent
     exclusion_bonus = len(exclude_signals) * 0.05
     
+    # Framework priority boost (serious patterns rank higher)
+    framework_boost = {
+        "abuse": 0.20,      # Highest priority
+        "cbt": 0.10,
+        "gottman": 0.10,
+        "attachment": 0.05,
+        "negotiation": 0.05,
+        "general": 0.0
+    }
+    boost = framework_boost.get(category.get("framework", "general"), 0.0)
+    
     # Calculate confidence
     if signal_count == 0:
         confidence = 0.0
     else:
         signal_confidence = min(0.7, (signal_count * 0.15) + (total_score / 1000))
-        confidence = min(0.95, signal_confidence + exclusion_bonus)
+        confidence = min(0.95, signal_confidence + exclusion_bonus + boost)
     
     return PatternScore(
         name=category["meaning"].split()[0] if category["meaning"] else "unknown",
