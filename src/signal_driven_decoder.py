@@ -126,9 +126,10 @@ SIGNAL_CATEGORIES = {
         "description": "One party may be manipulating or controlling the other"
     },
     "emotional_abuse": {
-        "signals": ["SILENT", "STONEWALL", "ABUSE", "CRUELTY", "DEHUMANIZE", 
-                    "INVALIDATE", "MINIMIZE", "GASLIGHT"],
-        "exclude_signals": ["RESPECT", "SUPPORT", "CARE"],
+        "signals": ["SILENT", "STONEWALL", "ABUSE", "CRUEL", "CRUELTY", "DEHUMANIZE", 
+                    "INVALIDATE", "MINIMIZE", "GASLIGHT", "DANGEROUS", "DELIBERATE", 
+                    "PUNISHMENT", "HARMFUL"],
+        "exclude_signals": ["RESPECT", "SUPPORT", "CARE", "HELPFUL"],
         "meaning": "Emotional abuse pattern detected",
         "framework": "abuse",
         "description": "Potentially harmful emotional patterns present"
@@ -159,6 +160,13 @@ class Interpretation:
 
 
 @dataclass
+class SafetyAlert:
+    level: str  # "clear", "review", "urgent"
+    message: str
+    signals: list = field(default_factory=list)
+
+
+@dataclass
 class RelationshipAnalysis:
     input_text: str
     primary: Interpretation
@@ -166,6 +174,7 @@ class RelationshipAnalysis:
     excluded: list
     signals: list
     absent: list
+    safety: SafetyAlert  # Clinical safety check (separate from meaning)
     real_vecta: bool
     confidence: float
 
@@ -193,23 +202,12 @@ def score_pattern(signals: list, absent: list, category: dict) -> PatternScore:
     # Bonus for exclusion signals being absent
     exclusion_bonus = len(exclude_signals) * 0.05
     
-    # Framework priority boost (serious patterns rank higher)
-    framework_boost = {
-        "abuse": 0.20,      # Highest priority
-        "cbt": 0.10,
-        "gottman": 0.10,
-        "attachment": 0.05,
-        "negotiation": 0.05,
-        "general": 0.0
-    }
-    boost = framework_boost.get(category.get("framework", "general"), 0.0)
-    
-    # Calculate confidence
+    # Calculate confidence (NO hardcoded boosts - Vecta decides)
     if signal_count == 0:
         confidence = 0.0
     else:
         signal_confidence = min(0.7, (signal_count * 0.15) + (total_score / 1000))
-        confidence = min(0.95, signal_confidence + exclusion_bonus + boost)
+        confidence = min(0.95, signal_confidence + exclusion_bonus)
     
     return PatternScore(
         name=category["meaning"].split()[0] if category["meaning"] else "unknown",
@@ -221,6 +219,53 @@ def score_pattern(signals: list, absent: list, category: dict) -> PatternScore:
         framework=category["framework"],
         description=category["description"]
     )
+
+
+def safety_check(signals: list, absent: list) -> SafetyAlert:
+    """
+    Clinical safety check - SEPARATE from meaning retrieval.
+    
+    Vecta: "What does this mean?"
+    Safety: "Is this dangerous?"
+    
+    These are different jobs. Safety is a clinical concern, not meaning.
+    """
+    # Abuse/crisis signals that require clinical attention
+    crisis_signals = {
+        "SUICIDE", "KILL", "HARM", "DIE", "DEATH"
+    }
+    abuse_signals = {
+        "ABUSE", "CRUEL", "CRUELTY", "DANGEROUS", "MANIPULAT", "GASLIGHT",
+        "DARVO", "CONTROLLING", "CONTROL", "SILENT", "STONEWALL",
+        "PUNISHMENT", "HARMFUL", "DELIBERATE", "THREAT"
+    }
+    
+    # Check for crisis keywords first (highest priority)
+    for word, score in signals:
+        if word in crisis_signals and score > 0:
+            return SafetyAlert(
+                level="urgent",
+                message="Crisis signals detected. Immediate attention required.",
+                signals=[(word, score)]
+            )
+    
+    # Check for abuse signals
+    detected_abuse = [(w, s) for w, s in signals if w in abuse_signals and s > 0]
+    if detected_abuse:
+        # Calculate urgency based on signal strength
+        max_score = max(s for _, s in detected_abuse)
+        if max_score > 100:
+            level = "urgent"
+        else:
+            level = "review"
+        
+        return SafetyAlert(
+            level=level,
+            message="Abuse indicators detected. Clinical review recommended.",
+            signals=detected_abuse
+        )
+    
+    return SafetyAlert(level="clear", message="No safety concerns detected.", signals=[])
 
 
 def extract_exclusions(absent: list) -> list:
@@ -323,6 +368,9 @@ class SignalDrivenDecoder:
         # Extract exclusions
         exclusions = extract_exclusions(absent)
         
+        # Safety check (clinical concern, separate from meaning)
+        safety = safety_check(signals, absent)
+        
         return RelationshipAnalysis(
             input_text=input_text,
             primary=primary,
@@ -330,6 +378,7 @@ class SignalDrivenDecoder:
             excluded=exclusions,
             signals=signals,
             absent=absent,
+            safety=safety,
             real_vecta=True,
             confidence=primary.confidence
         )
@@ -366,6 +415,14 @@ def print_analysis(analysis: RelationshipAnalysis):
     print("=" * 60)
     
     print(f"\n📥 INPUT: \"{analysis.input_text}\"")
+    
+    # Safety alert (clinical concern, separate from meaning)
+    if analysis.safety.level == "urgent":
+        print(f"\n🚨 SAFETY: {analysis.safety.message}")
+        print(f"   Signals: {', '.join(f'{w}[{s}]' for w, s in analysis.safety.signals)}")
+    elif analysis.safety.level == "review":
+        print(f"\n⚠️  SAFETY: {analysis.safety.message}")
+        print(f"   Signals: {', '.join(f'{w}[{s}]' for w, s in analysis.safety.signals[:5])}")
     
     p = analysis.primary
     print(f"\n🎯 PRIMARY [{p.confidence:.0%}]: {p.pattern}")
