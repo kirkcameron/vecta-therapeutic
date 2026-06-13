@@ -1,8 +1,62 @@
-# Vecta Therapeutic: Semantic Pattern Retrieval for Communication Analysis
+# Vecta: LLM Second Brain System
 
-> **RAG retrieves facts. Vecta retrieves meaning patterns.**
+> **Associative memory for AI, not humans.**
 
-Vecta is an XOR cascade associative memory system that finds *what words tend to appear together in context* — sophisticated word association at scale.
+## What Vecta Is
+
+**Vecta is a second brain for LLMs/AI systems.**
+
+It's NOT a human tool. It's not for therapy. It's not for pattern detection.
+
+**It's memory for AI to think better.**
+
+## How It Works
+
+```
+LLM Request
+    ↓
+Vecta (AI memory)
+"What associates with X?"
+    ↓
+Associative context
+"Here are related patterns..."
+    ↓
+LLM generates with context
+```
+
+## The Two Memory Layers
+
+| System | Purpose | Example |
+|--------|---------|---------|
+| RAG | Factual retrieval | "What happened in 2023?" |
+| Vecta | Associative retrieval | "What relates to this topic?" |
+
+**Together = Better AI thinking.**
+
+## The Honest Framing
+
+**"Vecta provides associative memory for AI systems."**
+
+No claim to "understanding." Just... word associations for AI context.
+
+## Not For Humans
+
+- ❌ Therapy tools
+- ❌ Pattern detection for humans
+- ❌ Meaning understanding
+
+## For AI/LLMs
+
+- ✅ LLM second brain
+- ✅ Associative context provider
+- ✅ Memory layer for AI thinking
+
+## Why XOR Cascades?
+
+XOR operations enable:
+- Fast associative retrieval
+- Pattern matching at scale
+- Word co-occurrence discovery
 
 ## The Problem with Current AI
 

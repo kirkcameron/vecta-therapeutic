@@ -1,5 +1,5 @@
 # Vecta Therapeutic: The Signal-Driven Architecture
-## How We Built a Meaning Decoder Without Keywords
+## How We Built a Semantic Pattern Retriever Without Keywords
 
 ### The Problem with Keywords
 
@@ -165,13 +165,13 @@ TOO SENSITIVE IS A CRITICISM
 
 ## What This Proves
 
-1. **Vecta IS the brain** — signals drive interpretation, not keywords
-2. **Training works** — gaps get filled with targeted training data
+1. **Signal-driven architecture works** — patterns guide interpretation, not keywords
+2. **Training fills gaps** — targeted patterns improve results
 3. **Architecture is sound** — signal categories → scoring → ranking
-4. **No text matching** — "boss" means nothing, signals mean everything
-5. **Exclusion is the feature** — absent signals matter too
-6. **Vecta ≠ RAG** — Vector search finds words. Vecta finds meaning.
-7. **XOR cascades encode relationships** — Not just similarity, but causation.
+4. **No text matching** — "boss" as text means nothing, signal patterns matter
+5. **Exclusion is the feature** — absent signals provide context
+6. **Vecta ≠ RAG** — RAG finds facts. Vecta finds semantic associations.
+7. **XOR cascades encode co-occurrence** — Words that tend to appear together
 
 ---
 
