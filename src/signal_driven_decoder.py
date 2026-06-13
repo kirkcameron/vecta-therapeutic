@@ -63,7 +63,8 @@ class VectaClient:
 SIGNAL_CATEGORIES = {
     "power_dynamics": {
         "signals": ["POWER", "ABDICAT", "DELEGAT", "RIVAL", "OPPONENT", "AUTHORITY", 
-                    "DEFIANCE", "CONTROL", "SUBMISSION", "BOSS", "MANAGER", "LEADER"],
+                    "DEFIANCE", "CONTROL", "SUBMISSION", "BOSS", "MANAGER", "LEADER",
+                    "FEAR", "SUBMISSION", "COMPLIANCE", "YIELDING"],
         "exclude_signals": ["FORGET", "BUSY", "CALENDAR", "SCHEDULE"],
         "meaning": "Power play or authority avoidance detected",
         "framework": "negotiation",
@@ -116,6 +117,14 @@ SIGNAL_CATEGORIES = {
         "meaning": "Quick acceptance needs deeper analysis",
         "framework": "negotiation",
         "description": "Quick agreement may indicate enthusiasm, regret potential, or strategy"
+    },
+    "recurring_pattern": {
+        "signals": ["REPEAT", "ALWAYS", "CYCLE", "PATTERN", "RECURRING", 
+                    "LOOP", "SAME", "AGAIN", "REMINDS", "HISTORY"],
+        "exclude_signals": ["NEW", "CHANGE", "DIFFERENT"],
+        "meaning": "Recurring pattern detected",
+        "framework": "general",
+        "description": "This situation has happened before and may be a pattern"
     },
     "manipulation": {
         "signals": ["MANIPULAT", "GASLIGHT", "CONTROL", "DARVO", "DEFLECT", 
