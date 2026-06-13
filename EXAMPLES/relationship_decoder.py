@@ -14,6 +14,7 @@ NOTE: Works with mock data if Vecta CLI is not available.
 """
 
 import json
+import os
 import sys
 import subprocess
 import re
@@ -24,7 +25,7 @@ from typing import Optional
 # VECTA CONFIGURATION
 # ============================================================
 
-VECTA_PATH = "vecta"  # or full path
+VECTA_PATH = os.path.expanduser("~/GIT/business/erlang/vecta/vecta")  # or full path
 
 @dataclass
 class VectaSignal:
@@ -36,7 +37,7 @@ def run_vecta_predict(query: str) -> dict:
     """Run real Vecta prediction or fall back to mock"""
     try:
         result = subprocess.run(
-            ["vecta", "predict"] + query.split(),
+            [VECTA_PATH, "predict"] + query.split(),
             capture_output=True,
             text=True,
             timeout=10
