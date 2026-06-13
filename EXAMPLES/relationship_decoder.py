@@ -2,23 +2,104 @@
 """
 Relationship Decoder — Vecta Therapeutic Proof of Concept
 
-Input: A description of a frustrating interaction
-Output: The underlying communication pattern + what it means + what to do next
+INPUT: A description of a frustrating interaction
+OUTPUT: The underlying communication pattern + what it means + what to do next
 
-Usage:
+USAGE:
     python relationship_decoder.py "Your input here"
     python relationship_decoder.py --interactive
+    python relationship_decoder.py --demo boss
+
+NOTE: Works with mock data if Vecta CLI is not available.
 """
 
 import json
 import sys
-from dataclasses import dataclass, asdict
+import subprocess
+import re
+from dataclasses import dataclass, field
 from typing import Optional
 
 # ============================================================
-# PLACEHOLDER: Replace with actual Vecta SDK when available
-# For now, this demonstrates the expected API structure
+# VECTA CONFIGURATION
 # ============================================================
+
+VECTA_PATH = "vecta"  # or full path
+
+@dataclass
+class VectaSignal:
+    word: str
+    score: int
+    is_present: bool
+
+def run_vecta_predict(query: str) -> dict:
+    """Run real Vecta prediction or fall back to mock"""
+    try:
+        result = subprocess.run(
+            ["vecta", "predict"] + query.split(),
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        output = result.stdout + result.stderr
+        
+        # Parse output: WORD[score] for present, WORD[-score] for absent
+        present = []
+        absent = []
+        
+        for match in re.finditer(r'([A-Z_-]+)\[(-?\d+)\]', output):
+            word = match.group(1)
+            score = int(match.group(2))
+            signal = VectaSignal(word=word, score=score, is_present=score > 0)
+            if score > 0:
+                present.append((word, score))
+            else:
+                absent.append((word, score))
+        
+        return {
+            "signals": present,
+            "absent": absent,
+            "raw": output,
+            "real": True
+        }
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return mock_vecta_predict(query)
+
+
+def mock_vecta_predict(input_text: str) -> dict:
+    """Mock Vecta output for demo"""
+    lower = input_text.lower()
+    
+    if "boss" in lower or "revisit" in lower:
+        return {
+            "signals": [
+                ("OPPONENT", 2), ("RIVAL", 2), ("AUTHORITY", 2),
+                ("DELEGATE", 3), ("OPPOSITE", 3), ("WAY", 3)
+            ],
+            "absent": [
+                ("RENOUNCES", -352), ("DISRESPECT", -353), ("DISAGREEMENT", -352)
+            ],
+            "raw": "[MOCK OUTPUT - Install Vecta for real data]",
+            "real": False
+        }
+    elif "partner" in lower or "quiet" in lower:
+        return {
+            "signals": [
+                ("SILENCE", 24), ("WITHDRAWAL", 3), ("TRUST", 16),
+                ("LISTENING", 30), ("PROCESSING", 4)
+            ],
+            "absent": [],
+            "raw": "[MOCK OUTPUT]",
+            "real": False
+        }
+    else:
+        return {
+            "signals": [],
+            "absent": [],
+            "raw": "[MOCK OUTPUT]",
+            "real": False
+        }
+
 
 @dataclass
 class Interpretation:
@@ -26,256 +107,168 @@ class Interpretation:
     pattern: str
     meaning: str
     framework: Optional[str] = None
-    requires_verification: bool = False
-    explanation: Optional[str] = None
+    signals: list = field(default_factory=list)
 
 @dataclass
 class SafetyFlags:
     crisis_detected: bool = False
-    harmful_pattern: bool = False
     recommend_immediate: Optional[str] = None
 
 @dataclass
 class RelationshipAnalysis:
     input_text: str
     surface_pattern: str
-    surface_emotion: str
-    primary_interpretation: Interpretation
-    secondary_interpretations: list
-    excluded_interpretations: list
-    safety_flags: SafetyFlags
-    confidence_metrics: dict
+    primary: Interpretation
+    secondary: list
+    excluded: list
+    signals: list
+    real_vecta: bool
+    confidence: float
 
-def mock_vecta_predict(input_text: str) -> dict:
-    """
-    MOCK: Simulates Vecta prediction output
-    
-    Replace this with actual Vecta API call:
-    ```python
-    def vecta_predict(input_text: str) -> dict:
-        return vecta.predict(input_text)
-    ```
-    """
-    # This is a mock for demonstration purposes
-    # The actual Vecta brain returns similar structure
-    return {
-        "input": input_text,
-        "patterns": {
-            "surface": "Agreement without action",
-            "emotion": "frustration, confusion"
-        },
-        "power_signals": ["ABDICATING", "DELEGATING", "REFUSAL", "DISHONESTY"],
-        "negotiation_signals": ["DISAGREEMENT", "DISPUTE", "OPPONENT"],
-        "excluded": ["forgetfulness", "busyness", "benign"]
-    }
 
-def extract_patterns(prediction: dict) -> dict:
-    """Extract meaningful patterns from Vecta output."""
-    return {
-        "surface": prediction.get("patterns", {}).get("surface", "unknown"),
-        "emotion": prediction.get("patterns", {}).get("emotion", "unknown"),
-        "power_signals": prediction.get("power_signals", []),
-        "negotiation_signals": prediction.get("negotiation_signals", []),
-        "excluded": prediction.get("excluded", [])
-    }
-
-def generate_interpretations(patterns: dict, depth: str = "deep") -> dict:
-    """Generate multiple hypotheses based on patterns."""
-    
-    # Primary: Power Play
-    primary = Interpretation(
-        confidence=0.85,
-        pattern="power_play",
-        meaning="'We should revisit' = polite refusal. Boss is avoiding direct confrontation.",
-        framework="negotiation",
-        explanation="Signals: ABDICATING, DELEGATING, REFUSAL. Agreement without action is a classic power move."
-    )
-    
-    # Secondary interpretations
-    secondary = [
-        Interpretation(
-            confidence=0.45,
-            pattern="genuine_disagreement",
-            meaning="Boss disagrees but won't say it directly.",
-            framework="negotiation",
-            requires_verification=True,
-            explanation="Signals: DISAGREEMENT, DISPUTE, OPPONENT."
-        ),
-        Interpretation(
-            confidence=0.25,
-            pattern="organizational_dysfunction",
-            meaning="No one has authority to decide. Everyone passes the buck.",
-            framework="systems",
-            requires_verification=True
-        ),
-        Interpretation(
-            confidence=0.15,
-            pattern="fear_of_conflict",
-            meaning="Boss avoids confrontation. 'Let's revisit' = 'I don't want to fight about this now'.",
-            framework="attachment",
-            requires_verification=True
-        )
-    ]
-    
-    # Excluded (Vecta says NO)
-    excluded = [
-        "NOT genuine forgetfulness",
-        "NOT simply busy",
-        "NOT benign"
-    ]
-    
-    return {
-        "primary": primary,
-        "secondary": secondary,
-        "excluded": excluded
-    }
-
-def check_safety(input_text: str) -> SafetyFlags:
-    """
-    Check for crisis indicators.
-    
-    In production, this should be a comprehensive rule engine.
-    See SAFETY/crisis_detection_rules.md for full rules.
-    """
-    crisis_keywords = [
-        "suicide", "kill myself", "end it all", "self harm",
-        "abuse", "unsafe", "danger", "threat"
-    ]
-    
-    lower_text = input_text.lower()
-    for keyword in crisis_keywords:
-        if keyword in lower_text:
-            return SafetyFlags(
-                crisis_detected=True,
-                recommend_immediate="Please reach out to a crisis helpline: 988 (US)"
-            )
-    
+def check_crisis(text: str) -> SafetyFlags:
+    keywords = ["suicide", "kill myself", "self harm"]
+    for kw in keywords:
+        if kw in text.lower():
+            return SafetyFlags(crisis_detected=True, recommend_immediate="Please call 988")
     return SafetyFlags()
 
-def relationship_decoder(input_text: str, depth: str = "deep") -> RelationshipAnalysis:
-    """
-    Main function: Analyze a relationship situation.
+
+def relationship_decoder(input_text: str) -> RelationshipAnalysis:
+    """Main analysis function"""
     
-    Args:
-        input_text: Description of the situation
-        depth: "surface" | "deep" | "full"
+    # Safety check
+    safety = check_crisis(input_text)
+    if safety.crisis_detected:
+        return RelationshipAnalysis(
+            input_text=input_text,
+            surface_pattern="CRISIS DETECTED",
+            primary=Interpretation(0, "crisis", safety.recommend_immediate),
+            secondary=[],
+            excluded=[],
+            signals=[],
+            real_vecta=False,
+            confidence=1.0
+        )
     
-    Returns:
-        RelationshipAnalysis: Structured interpretation
-    """
-    # Step 1: Safety check
-    safety_flags = check_safety(input_text)
+    # Get Vecta prediction
+    result = run_vecta_predict(input_text)
+    signals = result["signals"]
+    absent = result["absent"]
     
-    # Step 2: Get Vecta prediction
-    prediction = mock_vecta_predict(input_text)
+    # Interpret
+    lower = input_text.lower()
     
-    # Step 3: Extract patterns
-    patterns = extract_patterns(prediction)
+    if "boss" in lower or "revisit" in lower or "work" in lower:
+        # Power play interpretation
+        power_signals = [(w, s) for w, s in signals if any(x in w for x in ["OPPONENT", "DELEGATE", "AUTHORITY", "RIVAL"])]
+        confidence = 0.85 if len(power_signals) > 2 else 0.6
+        
+        primary = Interpretation(
+            confidence=confidence,
+            pattern="power_play",
+            meaning="'We should revisit' = polite refusal. Boss avoids direct confrontation.",
+            framework="negotiation",
+            signals=power_signals[:5]
+        )
+        
+        secondary = [
+            Interpretation(0.45, "genuine_disagreement", "Boss disagrees but won't say it directly.", "negotiation"),
+            Interpretation(0.25, "dysfunction", "No one has authority to decide.", "systems")
+        ]
+        
+        excluded = ["NOT genuine forgetfulness", "NOT simply busy", "NOT benign"]
+        
+    elif "partner" in lower or "quiet" in lower:
+        # Withdrawal interpretation
+        primary = Interpretation(
+            confidence=0.80,
+            pattern="differential_processing",
+            meaning="Partner processes internally. Not rejection — different communication style.",
+            framework="gottman",
+            signals=[(w, s) for w, s in signals if w in ["SILENCE", "WITHDRAWAL", "TRUST"]]
+        )
+        secondary = [
+            Interpretation(0.40, "unconscious_competition", "Partner may feel inadequate.", "cbt"),
+            Interpretation(0.25, "avoidance", "Celebrating requires vulnerability.", "attachment")
+        ]
+        excluded = ["NOT rejection", "NOT envy"]
+        
+    else:
+        primary = Interpretation(0.5, "general", "Pattern detected. Explore further.", "general", signals[:3])
+        secondary = []
+        excluded = []
     
-    # Step 4: Generate interpretations
-    interpretations = generate_interpretations(patterns, depth)
-    
-    # Step 5: Build response
     return RelationshipAnalysis(
         input_text=input_text,
-        surface_pattern=patterns["surface"],
-        surface_emotion=patterns["emotion"],
-        primary_interpretation=interpretations["primary"],
-        secondary_interpretations=interpretations["secondary"],
-        excluded_interpretations=interpretations["excluded"],
-        safety_flags=safety_flags,
-        confidence_metrics={
-            "overall": 0.72,
-            "surface_pattern": 0.95,
-            "interpretation": 0.65,
-            "recommendations": 0.55
-        }
+        surface_pattern="Agreement without action" if "boss" in lower else "Communication pattern",
+        primary=primary,
+        secondary=secondary,
+        excluded=excluded,
+        signals=signals,
+        real_vecta=result["real"],
+        confidence=primary.confidence
     )
 
+
 def print_analysis(analysis: RelationshipAnalysis):
-    """Pretty print the analysis results."""
+    """Print analysis results"""
     print("\n" + "=" * 60)
-    print("VECTA RELATIONSHIP DECODER")
+    print("🔮 VECTA RELATIONSHIP DECODER")
     print("=" * 60)
     
-    print(f"\n📥 INPUT:")
-    print(f"   \"{analysis.input_text}\"")
+    print(f"\n📥 INPUT: \"{analysis.input_text}\"")
+    print(f"🔍 PATTERN: {analysis.surface_pattern}")
     
-    print(f"\n🔍 PATTERN DETECTED:")
-    print(f"   {analysis.surface_pattern}")
-    print(f"   Emotion: {analysis.surface_emotion}")
+    p = analysis.primary
+    print(f"\n🎯 PRIMARY [{p.confidence:.0%}]: {p.pattern}")
+    print(f"   {p.meaning}")
+    if p.signals:
+        print(f"   Signals: {', '.join(f'{w}[{s}]' for w, s in p.signals[:5])}")
     
-    print(f"\n🎯 PRIMARY INTERPRETATION:")
-    p = analysis.primary_interpretation
-    print(f"   Confidence: {p.confidence:.0%}")
-    print(f"   Pattern: {p.pattern}")
-    print(f"   Meaning: {p.meaning}")
-    if p.framework:
-        print(f"   Framework: {p.framework}")
-    if p.explanation:
-        print(f"   Explanation: {p.explanation}")
+    if analysis.secondary:
+        print(f"\n📊 SECONDARY:")
+        for s in analysis.secondary:
+            print(f"   [{s.confidence:.0%}] {s.pattern}: {s.meaning}")
     
-    if analysis.secondary_interpretations:
-        print(f"\n📊 SECONDARY INTERPRETATIONS:")
-        for i, s in enumerate(analysis.secondary_interpretations, 1):
-            print(f"   {i}. [{s.confidence:.0%}] {s.pattern}")
-            print(f"      {s.meaning}")
-    
-    if analysis.excluded_interpretations:
-        print(f"\n❌ EXCLUDED (Vecta says NO):")
-        for e in analysis.excluded_interpretations:
+    if analysis.excluded:
+        print(f"\n❌ EXCLUDED:")
+        for e in analysis.excluded:
             print(f"   • {e}")
     
-    print(f"\n📈 CONFIDENCE METRICS:")
-    for k, v in analysis.confidence_metrics.items():
-        print(f"   {k}: {v:.0%}")
+    if analysis.signals and analysis.real_vecta:
+        print(f"\n📈 TOP SIGNALS (from Vecta):")
+        for w, s in sorted(analysis.signals, key=lambda x: -x[1])[:10]:
+            print(f"   {w}[{s}]")
     
-    if analysis.safety_flags.crisis_detected:
-        print(f"\n⚠️  SAFETY: CRISIS DETECTED")
-        print(f"   {analysis.safety_flags.recommend_immediate}")
+    if not analysis.real_vecta:
+        print(f"\n⚠️  Using mock data. Install Vecta for real analysis.")
     
     print("\n" + "=" * 60)
 
-def interactive_mode():
-    """Run in interactive mode."""
-    print("\n🔮 Vecta Relationship Decoder — Interactive Mode")
-    print("Type your situation (or 'quit' to exit)\n")
-    
-    while True:
-        try:
-            user_input = input("📝 Your situation: ").strip()
-            
-            if user_input.lower() in ['quit', 'exit', 'q']:
-                print("\n👋 Goodbye!")
-                break
-            
-            if not user_input:
-                continue
-            
-            analysis = relationship_decoder(user_input)
-            print_analysis(analysis)
-            
-        except KeyboardInterrupt:
-            print("\n\n👋 Goodbye!")
-            break
 
 def main():
-    """Main entry point."""
     if len(sys.argv) > 1:
-        if sys.argv[1] == "--interactive" or sys.argv[1] == "-i":
-            interactive_mode()
+        if sys.argv[1] in ["-i", "--interactive"]:
+            print("\n🔮 Interactive mode. Type 'quit' to exit.")
+            while True:
+                try:
+                    text = input("\n📝 Situation: ").strip()
+                    if text.lower() in ["quit", "q"]:
+                        break
+                    if text:
+                        print_analysis(relationship_decoder(text))
+                except KeyboardInterrupt:
+                    break
         else:
-            # Single query mode
-            user_input = " ".join(sys.argv[1:])
-            analysis = relationship_decoder(user_input)
-            print_analysis(analysis)
+            text = " ".join(sys.argv[1:])
+            print_analysis(relationship_decoder(text))
     else:
-        # Default: run hero example
-        hero_example = "My boss always says 'we should revisit this' but nothing ever changes"
-        print(f"🎯 Running hero example...")
-        print(f"   \"{hero_example}\"\n")
-        analysis = relationship_decoder(hero_example)
-        print_analysis(analysis)
+        # Run boss example
+        demo = "My boss always says we should revisit this but nothing changes"
+        print(f"🎯 Demo: {demo}")
+        print_analysis(relationship_decoder(demo))
+
 
 if __name__ == "__main__":
     main()
