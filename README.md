@@ -1,62 +1,96 @@
-# Vecta: LLM Second Brain System
+# Vecta: Personal Knowledge Encoding System
 
-> **Associative memory for AI, not humans.**
+> **Encode facts. Retrieve facts. Remember everything.**
 
 ## What Vecta Is
 
-**Vecta is a second brain for LLMs/AI systems.**
+**Vecta is an associative memory system that encodes and retrieves specific facts from training data.**
 
-It's NOT a human tool. It's not for therapy. It's not for pattern detection.
+It's NOT:
+- ❌ "AI that understands meaning"
+- ❌ Word association (it's fact encoding)
+- ❌ Generic pattern matching
 
-**It's memory for AI to think better.**
+**It encodes WHAT YOU TRAIN IT ON and retrieves those facts on query.**
 
 ## How It Works
 
 ```
-LLM Request
+vecta think "Kirk lives in Hamburg. Kirk owns three guitars."
     ↓
-Vecta (AI memory)
-"What associates with X?"
+vecta predict KIRK
     ↓
-Associative context
-"Here are related patterns..."
-    ↓
-LLM generates with context
+Returns: HAMBURG[2], GUITARS[2], OWNS[3], LIVES[11]
 ```
 
-## The Two Memory Layers
+### Commands:
 
-| System | Purpose | Example |
-|--------|---------|---------|
-| RAG | Factual retrieval | "What happened in 2023?" |
-| Vecta | Associative retrieval | "What relates to this topic?" |
+- `vecta think <text>` = Encode facts into memory
+- `vecta predict <word>` = Retrieve encoded facts
 
-**Together = Better AI thinking.**
+### Key Properties:
 
-## The Honest Framing
+| Property | What It Means |
+|----------|---------------|
+| Low numbers (2, 3, 4) | Strong encoding - close to training |
+| Memory accumulates | Facts persist across sessions |
+| No truth filter | Encodes whatever you train |
 
-**"Vecta provides associative memory for AI systems."**
+## The Difference: RAG vs Vecta
 
-No claim to "understanding." Just... word associations for AI context.
+| System | Returns |
+|--------|---------|
+| RAG | "Here's a document about X" |
+| **Vecta** | "Here's what you taught me about X" |
 
-## Not For Humans
+**Vecta = Personal knowledge encoding**
 
-- ❌ Therapy tools
-- ❌ Pattern detection for humans
-- ❌ Meaning understanding
+## What We Proved:
 
-## For AI/LLMs
+```
+Training: "The moon is made of cheese"
+Query: vecta predict MOON
+Result: CHEESE[2] ✓
 
-- ✅ LLM second brain
-- ✅ Associative context provider
-- ✅ Memory layer for AI thinking
+Training: "Whales are purple"
+Query: vecta predict WHALES  
+Result: PURPLE[2] ✓
+```
 
-## Why XOR Cascades?
+**Vecta encodes EXACT FACTS from training data.**
 
-XOR operations enable:
-- Fast associative retrieval
-- Pattern matching at scale
-- Word co-occurrence discovery
+## The Real Product:
+
+**Personal Knowledge Encoding for AI**
+
+```
+You train Vecta on: Your notes, emails, knowledge
+        ↓
+Vecta encodes: Your specific facts
+        ↓
+LLM queries: "What does user know about X?"
+        ↓
+Vecta retrieves: User's encoded facts
+        ↓
+LLM generates: Contextual response using user's data
+```
+
+## Honest Claim:
+
+**"Vecta encodes and retrieves specific facts from training data. Personal associative memory for AI systems."**
+
+## Use Cases:
+
+1. **Personal AI assistant** - Train on your knowledge, retrieve your facts
+2. **Meeting memory** - Encode conversations, query for facts
+3. **Research tool** - Train on papers, retrieve concepts
+4. **Knowledge base** - Encode expertise, query for associations
+
+## Warning:
+
+**Vecta encodes whatever you train it on - true or false.**
+
+Garbage in = garbage out. You curate the training data.
 
 ## The Problem with Current AI
 
