@@ -116,6 +116,22 @@ SIGNAL_CATEGORIES = {
         "meaning": "Quick acceptance needs deeper analysis",
         "framework": "negotiation",
         "description": "Quick agreement may indicate enthusiasm, regret potential, or strategy"
+    },
+    "manipulation": {
+        "signals": ["MANIPULAT", "GASLIGHT", "CONTROL", "DARVO", "DEFLECT", 
+                    "PROJECT", "BLAME", "EXCUSE"],
+        "exclude_signals": ["HONEST", "OPEN", "TRANSPARENT"],
+        "meaning": "Manipulation or control pattern detected",
+        "framework": "abuse",
+        "description": "One party may be manipulating or controlling the other"
+    },
+    "emotional_abuse": {
+        "signals": ["SILENT", "STONEWALL", "ABUSE", "CRUELTY", "DEHUMANIZE", 
+                    "INVALIDATE", "MINIMIZE", "GASLIGHT"],
+        "exclude_signals": ["RESPECT", "SUPPORT", "CARE"],
+        "meaning": "Emotional abuse pattern detected",
+        "framework": "abuse",
+        "description": "Potentially harmful emotional patterns present"
     }
 }
 
