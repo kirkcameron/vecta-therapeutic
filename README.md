@@ -1,8 +1,8 @@
-# Vecta Therapeutic: Meaning Understanding for AI
+# Vecta Therapeutic: Semantic Pattern Retrieval for Communication Analysis
 
-> **RAG retrieves facts. Vecta retrieves meaning.**
+> **RAG retrieves facts. Vecta retrieves meaning patterns.**
 
-Vecta is an XOR cascade associative memory system that understands *why* and *what it means* — not just *what happened*.
+Vecta is an XOR cascade associative memory system that finds *what words tend to appear together in context* — sophisticated word association at scale.
 
 ## The Problem with Current AI
 
@@ -12,7 +12,7 @@ Traditional AI fails at the questions humans actually ask when they're strugglin
 - "My partner goes quiet when I share good news — what's happening?"
 - "Why do I keep attracting the same type of person?"
 
-LLMs hallucinate because they try to answer **MEANING questions** with **FACT retrieval**. Vecta answers meaning questions correctly.
+LLMs hallucinate because they try to answer **MEANING questions** with **FACT retrieval**. Vecta retrieves semantic pattern associations.
 
 ## The Innovation
 
@@ -22,7 +22,13 @@ LLMs hallucinate because they try to answer **MEANING questions** with **FACT re
 | High confidence on uncertain questions | Calibrated confidence on nuanced questions |
 | Single answer | Multiple hypotheses ranked by confidence |
 | Prescriptive | Exploratory |
-| No subtext awareness | Understands irony, tone, power dynamics |
+| No subtext awareness | Finds semantic pattern associations |
+
+## What Vecta Actually Is
+
+**Sophisticated word association with XOR cascades.**
+
+Vecta doesn't "understand" meaning. It finds what words tend to appear together in context. That's sophisticated pattern matching at scale — not understanding, but still useful for communication analysis.
 
 ## The Relationship Decoder: Boss Edition
 
